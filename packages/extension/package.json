@@ -1,0 +1,25 @@
+{
+  "name": "@moments/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Chrome MV3 extension: one hotkey saves a YouTube timestamp to Moments.",
+  "scripts": {
+    "icons": "node scripts/generate-icons.mjs",
+    "build": "rm -rf dist && npm run icons && vite build && vite build --config vite.config.content.ts",
+    "dev": "npm run icons && concurrently -k -n main,content -c blue,magenta \"vite build --watch\" \"vite build --config vite.config.content.ts --watch\"",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "zip": "npm run build && cd dist && zip -qr ../moments-extension.zip . && echo 'wrote packages/extension/moments-extension.zip'"
+  },
+  "dependencies": {
+    "@moments/shared": "*",
+    "@supabase/supabase-js": "^2.48.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.301",
+    "@types/node": "^22.13.1",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11"
+  }
+}

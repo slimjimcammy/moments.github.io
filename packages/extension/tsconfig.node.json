@@ -1,0 +1,16 @@
+{
+  "//": "The Vite configs run in Node, so they get Node types; extension source does not.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["vite.config.ts", "vite.config.content.ts"]
+}

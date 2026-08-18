@@ -1,0 +1,29 @@
+{
+  "name": "moments",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Frictionless YouTube timestamp bookmarks: a Chrome extension + web UI backed by Supabase.",
+  "type": "module",
+  "workspaces": [
+    "packages/shared",
+    "packages/extension",
+    "packages/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @moments/web",
+    "dev:web": "npm run dev --workspace @moments/web",
+    "dev:ext": "npm run dev --workspace @moments/extension",
+    "build": "npm run build --workspace @moments/web && npm run build --workspace @moments/extension",
+    "build:web": "npm run build --workspace @moments/web",
+    "build:ext": "npm run build --workspace @moments/extension",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

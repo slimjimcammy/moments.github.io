@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Moments</title>
+  </head>
+  <body>
+    <main class="panel" aria-busy="true">
+      <header class="brand">
+        <img src="icons/icon-48.png" width="22" height="22" alt="" />
+        <span>Moments</span>
+      </header>
+
+      <p class="banner" id="banner" hidden></p>
+
+      <section class="account" id="account" hidden>
+        <img class="avatar" id="avatar" width="34" height="34" alt="" hidden />
+        <div class="who">
+          <strong id="name"></strong>
+          <span id="email"></span>
+        </div>
+      </section>
+
+      <button class="primary" id="capture" hidden>Save this moment</button>
+      <button class="secondary" id="open" hidden>Open my moments</button>
+      <button class="primary" id="signin" hidden>Sign in with Google</button>
+
+      <p class="lede" id="lede">Checking your session…</p>
+
+      <section class="keys" id="keys" hidden>
+        <div><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>1</kbd><span>Save this moment</span></div>
+        <div><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>2</kbd><span>Note the last one</span></div>
+      </section>
+
+      <footer>
+        <button class="link" id="shortcuts">Change shortcuts</button>
+        <button class="link" id="signout" hidden>Sign out</button>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/popup/popup.ts"></script>
+  </body>
+</html>

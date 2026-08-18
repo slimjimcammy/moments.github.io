@@ -1,0 +1,18 @@
+node_modules/
+dist/
+*.zip
+
+# Local env files — never commit keys
+.env
+.env.local
+.env.*.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Supabase CLI
+supabase/.branches/
+supabase/.temp/

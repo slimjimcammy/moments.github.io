@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Moments — YouTube timestamp bookmarks",
+  "short_name": "Moments",
+  "version": "0.1.0",
+  "description": "Press Alt+Shift+M to save the exact YouTube moment you're watching, with an optional note and tags.",
+  "minimum_chrome_version": "116",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Moments",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "permissions": ["storage", "identity", "scripting", "tabs"],
+  "host_permissions": [
+    "https://*.supabase.co/*",
+    "https://www.youtube.com/*",
+    "https://m.youtube.com/*"
+  ],
+  "commands": {
+    "save-moment": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+1",
+        "mac": "Ctrl+Shift+1"
+      },
+      "description": "Save a moment at the current timestamp",
+      "global": true
+    },
+    "annotate-last-moment": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+2",
+        "mac": "Ctrl+Shift+2"
+      },
+      "description": "Add a note or tags to the moment you just saved",
+      "global": true
+    }
+  }
+}
