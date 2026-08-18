@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -rlE \"from '\\\\.{1,2}/[^']*\\\\.js'\" packages/shared/src packages/extension/src)",
+      "Bash(xargs perl -pi -e \"s{\\(from '\\\\.{1,2}/[^']*\\)\\\\.js'}{\\\\$1'}g\")",
+      "Bash(grep -rnE \"from '\\\\.{1,2}/[^']*\\\\.js'\" packages/shared/src packages/extension/src)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ]
+  }
+}
