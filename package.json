@@ -17,10 +17,12 @@
     "build:web": "npm run build --workspace @moments/web",
     "build:ext": "npm run build --workspace @moments/extension",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules"
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules",
+    "deploy": "gh-pages -d packages/web/dist"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.7.3"
   },
   "engines": {
