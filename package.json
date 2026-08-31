@@ -7,12 +7,14 @@
   "workspaces": [
     "packages/shared",
     "packages/extension",
-    "packages/web"
+    "packages/web",
+    "packages/downloader"
   ],
   "scripts": {
     "dev": "npm run dev --workspace @moments/web",
     "dev:web": "npm run dev --workspace @moments/web",
     "dev:ext": "npm run dev --workspace @moments/extension",
+    "dev:downloader": "npm run start --workspace @moments/downloader",
     "build": "npm run build --workspace @moments/web && npm run build --workspace @moments/extension",
     "build:web": "npm run build --workspace @moments/web",
     "build:ext": "npm run build --workspace @moments/extension",

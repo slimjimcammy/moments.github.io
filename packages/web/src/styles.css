@@ -231,6 +231,15 @@ kbd {
   margin-top: 12px;
 }
 
+.download-clips {
+  margin-top: 12px;
+}
+
+.download-clips:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
