@@ -47,9 +47,7 @@ export type Request =
   | { type: 'SIGN_IN' }
   | { type: 'SIGN_OUT' }
   | { type: 'GET_TAGS' }
-  /** Opens the web UI when url is omitted. */
   | { type: 'OPEN_URL'; url?: string }
-  /** The popup's mouse-driven equivalent of the capture hotkey. */
   | { type: 'CAPTURE_ACTIVE_TAB' }
   | { type: 'SAVE_MOMENT'; meta: VideoMeta }
   | {
@@ -60,7 +58,8 @@ export type Request =
       clearEnd?: boolean;
       tags?: string[];
     }
-  | { type: 'DELETE_MOMENT'; momentId: string };
+  | { type: 'DELETE_MOMENT'; momentId: string }
+  | { type: 'ANNOTATE_LAST' };
 
 export type TabMessage =
   | { type: 'PING' }

@@ -9,6 +9,7 @@ import {
 } from '../messages';
 import { getPlayerVideo, scrapeVideoMeta } from './scrape';
 import { toast, type MomentHandlers, type UpdatePatch } from './toast';
+import { installShortcuts } from './shortcuts';
 
 declare global {
   interface Window {
@@ -40,6 +41,20 @@ function init(): void {
     currentTime() {
       const video = getPlayerVideo();
       return video && Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    },
+  });
+
+  installShortcuts({
+    capture: () => {
+      void capture();
+    },
+    annotateLast: () => {
+      void sendToBackground<EmptyResult>({
+        type: 'ANNOTATE_LAST',
+      });
+    },
+    dismiss: () => {
+      toast.dismiss();
     },
   });
 

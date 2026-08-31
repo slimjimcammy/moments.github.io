@@ -31,45 +31,6 @@ class AppError extends Error {
 // means the worker is healthy and the keystroke is the missing piece.
 console.log('[moments] service worker booted');
 
-// ---------------------------------------------------------------------------
-// hotkeys
-// ---------------------------------------------------------------------------
-
-chrome.commands.onCommand.addListener((command) => {
-  // Traced on purpose: if "command received" never prints in the service worker
-  // console, Chrome never delivered the keystroke and nothing downstream is at
-  // fault. Check chrome://extensions/shortcuts, and whether another macOS app
-  // swallowed the combo before Chrome saw it.
-  console.log('[moments] command received:', command);
-  void dispatchCommand(command).catch((error: unknown) => {
-    const message = describe(error);
-    console.warn('[moments] command failed:', message);
-    void flashBadge('!', '#ef4444', `Moments — ${message}`);
-  });
-});
-
-/** Shared by the hotkey and the popup's "Save this moment" button. */
-async function dispatchCommand(command: string): Promise<void> {
-  const tab = await activeYouTubeTab();
-  if (!tab?.id) throw new AppError('Open a YouTube video first.');
-
-  const injected = await ensureContentScript(tab.id);
-  if (!injected) throw new AppError('Reload this YouTube tab and try again.');
-
-  console.log('[moments] dispatching', command, 'to tab', tab.id);
-
-  if (command === 'save-moment') {
-    await sendToTab(tab.id, { type: 'CAPTURE' });
-    return;
-  }
-
-  if (command === 'annotate-last-moment') {
-    const saved = await readLastSaved();
-    if (!saved) throw new AppError('Nothing saved yet.');
-    await sendToTab(tab.id, { type: 'ANNOTATE', saved });
-  }
-}
-
 async function activeYouTubeTab(): Promise<chrome.tabs.Tab | null> {
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
   if (!tab?.url) return null;
@@ -170,9 +131,16 @@ async function handle(request: Request): Promise<Record<string, unknown>> {
       await chrome.tabs.create({ url: request.url ?? WEB_APP_URL });
       return {};
 
-    case 'CAPTURE_ACTIVE_TAB':
-      await dispatchCommand('save-moment');
+    case 'CAPTURE_ACTIVE_TAB': {
+      const tab = await activeYouTubeTab();
+      if (!tab?.id) throw new AppError('Open a YouTube video first.');
+
+      const injected = await ensureContentScript(tab.id);
+      if (!injected) throw new AppError('Reload this YouTube tab and try again.');
+
+      await sendToTab(tab.id, { type: 'CAPTURE' });
       return {};
+    }
 
     case 'SAVE_MOMENT':
       return await saveMoment(request.meta);
@@ -182,6 +150,21 @@ async function handle(request: Request): Promise<Record<string, unknown>> {
 
     case 'DELETE_MOMENT':
       return await deleteMoment(request.momentId);
+
+      case 'ANNOTATE_LAST': {
+        const tab = await activeYouTubeTab();
+        if (!tab?.id) throw new AppError('Open a YouTube video first.');
+
+        const saved = await readLastSaved();
+        if (!saved) throw new AppError('Nothing saved yet.');
+
+        await sendToTab(tab.id, {
+          type: 'ANNOTATE',
+          saved,
+        });
+
+        return {};
+      }
   }
 }
 

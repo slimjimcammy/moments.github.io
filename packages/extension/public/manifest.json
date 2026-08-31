@@ -38,23 +38,5 @@
     "https://*.supabase.co/*",
     "https://www.youtube.com/*",
     "https://m.youtube.com/*"
-  ],
-  "commands": {
-    "save-moment": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+1",
-        "mac": "Ctrl+Shift+1"
-      },
-      "description": "Save a moment at the current timestamp",
-      "global": true
-    },
-    "annotate-last-moment": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+2",
-        "mac": "Ctrl+Shift+2"
-      },
-      "description": "Add a note or tags to the moment you just saved",
-      "global": true
-    }
-  }
+  ]
 }

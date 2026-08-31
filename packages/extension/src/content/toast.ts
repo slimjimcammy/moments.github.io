@@ -138,7 +138,7 @@ class CaptureToast {
     this.scheduleDismiss(ERROR_DISMISS_MS);
   }
 
-  /** Ctrl+Shift+2: reopen the card for the last moment, cursor in the note. */
+  /** Alt+Shift+N: reopen the card for the last moment, cursor in the note. */
   annotate(saved: SavedMoment, handlers: MomentHandlers): void {
     this.interacted = true;
     this.showSaved(saved, handlers);
@@ -372,7 +372,7 @@ class CaptureToast {
     const outcome = await this.globals?.signIn();
     this.el.signIn.disabled = false;
     if (outcome?.ok) {
-      this.el.status.textContent = 'Signed in — press Ctrl+Shift+1 again.';
+      this.el.status.textContent = 'Signed in — press Alt+Shift+M again.';
       this.el.signIn.hidden = true;
       this.scheduleDismiss(5000);
     } else {
