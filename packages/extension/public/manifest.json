@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Moments — YouTube timestamp bookmarks",
   "short_name": "Moments",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Press Alt+Shift+M to save the exact YouTube moment you're watching, with an optional note and tags.",
   "minimum_chrome_version": "116",
   "icons": {
