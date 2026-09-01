@@ -19,7 +19,6 @@ export function momentToObsidian(moment: ObsidianMoment): string {
 
   const title = escapeYaml(moment.title);
   const youtube = escapeYaml(moment.youtubeUrl);
-  const thumbnail = escapeYaml(moment.thumbnailUrl);
 
   const tagLines = tags.length
     ? tags.map((tag) => `  - ${escapeYaml(tag)}`).join('\n')

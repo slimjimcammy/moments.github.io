@@ -5,7 +5,16 @@ import {
 } from '@moments/shared';
 
 export async function exportMomentsToObsidian(moments: Moment[]): Promise<number> {
-  if (!('showDirectoryPicker' in window)) {
+  const showDirectoryPicker = (
+    window as Window & {
+      showDirectoryPicker?: (options?: {
+        mode?: 'read' | 'readwrite';
+        id?: string;
+      }) => Promise<FileSystemDirectoryHandle>;
+    }
+  ).showDirectoryPicker;
+
+  if (!showDirectoryPicker) {
     throw new Error('Obsidian export requires a Chromium-based browser.');
   }
 
@@ -13,7 +22,7 @@ export async function exportMomentsToObsidian(moments: Moment[]): Promise<number
     throw new Error('Select at least one moment to export.');
   }
 
-  const directory = await window.showDirectoryPicker({
+  const directory = await showDirectoryPicker({
     mode: 'readwrite',
     id: 'moments-obsidian-export',
   });
