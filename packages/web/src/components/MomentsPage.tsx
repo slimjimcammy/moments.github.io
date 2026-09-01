@@ -5,11 +5,13 @@ import { filterMoments, tagCounts } from '../lib/filter';
 import { supabase } from '../lib/supabase';
 import { useMoments } from '../hooks/useMoments';
 import { MomentCard } from './MomentCard';
+import { exportMomentsToObsidian } from '../lib/obsidian';
 
 export function MomentsPage({ session }: { session: Session }) {
   const { moments, status, error, reload, setNote, setTags, remove } = useMoments(true);
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedMoments, setSelectedMoments] = useState<string[]>([]);
   const [flash, setFlash] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
@@ -19,8 +21,8 @@ export function MomentsPage({ session }: { session: Session }) {
   const searched = useMemo(() => filterMoments(moments, { query, tags: [] }), [moments, query]);
   const counts = useMemo(() => tagCounts(searched), [searched]);
   const visible = useMemo(
-    () => filterMoments(searched, { query: '', tags: selected }),
-    [searched, selected],
+    () => filterMoments(searched, { query: '', tags: selectedTags }),
+    [searched, selectedTags],
   );
   const allTags = useMemo(() => tagCounts(moments).map((tag) => tag.name), [moments]);
   const videoCount = useMemo(
@@ -55,7 +57,7 @@ export function MomentsPage({ session }: { session: Session }) {
   }, []);
 
   const toggleTag = useCallback((name: string) => {
-    setSelected((current) =>
+    setSelectedTags((current) =>
       current.some((tag) => tag.toLowerCase() === name.toLowerCase())
         ? current.filter((tag) => tag.toLowerCase() !== name.toLowerCase())
         : [...current, name],
@@ -81,7 +83,20 @@ export function MomentsPage({ session }: { session: Session }) {
   const displayName = (user.user_metadata?.full_name ?? user.user_metadata?.name) as
     | string
     | undefined;
-  const filtering = query.trim().length > 0 || selected.length > 0;
+  const filtering = query.trim().length > 0 || selectedTags.length > 0;
+
+  const exportSelected = useCallback(async () => {
+    const chosen = moments.filter((moment) => selectedMoments.includes(moment.id));
+
+    try {
+      const count = await exportMomentsToObsidian(chosen);
+      show(`Exported ${count} moment${count === 1 ? '' : 's'} to Obsidian`);
+      setSelectedMoments([]);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      show(error instanceof Error ? error.message : 'Obsidian export failed.');
+    }
+  }, [moments, selectedMoments, show]);
 
   return (
     <div className="page">
@@ -130,8 +145,8 @@ export function MomentsPage({ session }: { session: Session }) {
         <div className="chips" role="group" aria-label="Filter by tag">
           <button
             type="button"
-            className={`chip${selected.length === 0 ? ' is-active' : ''}`}
-            onClick={() => setSelected([])}
+            className={`chip${selectedTags.length === 0 ? ' is-active' : ''}`}
+            onClick={() => setSelectedTags([])}
           >
             All
           </button>
@@ -140,7 +155,7 @@ export function MomentsPage({ session }: { session: Session }) {
               key={tag.name}
               type="button"
               className={`chip${
-                selected.some((name) => name.toLowerCase() === tag.name.toLowerCase())
+                selectedTags.some((name) => name.toLowerCase() === tag.name.toLowerCase())
                   ? ' is-active'
                   : ''
               }`}
@@ -151,6 +166,14 @@ export function MomentsPage({ session }: { session: Session }) {
             </button>
           ))}
         </div>
+        <button
+          className="solid"
+          type="button"
+          disabled={selectedMoments.length === 0}
+          onClick={() => void exportSelected()}
+        >
+          Export {selectedMoments.length || ''} to Obsidian
+        </button>
       </div>
 
       <datalist id="moments-all-tags">
@@ -195,7 +218,7 @@ export function MomentsPage({ session }: { session: Session }) {
             type="button"
             onClick={() => {
               setQuery('');
-              setSelected([]);
+              setSelectedTags([]);
             }}
           >
             Clear filters
@@ -213,7 +236,7 @@ export function MomentsPage({ session }: { session: Session }) {
               <MomentCard
                 key={moment.id}
                 moment={moment}
-                activeTags={selected}
+                activeTags={selectedTags}
                 onCopy={(text, label) => void copy(text, label)}
                 onTagClick={toggleTag}
                 onNote={(note) => {
@@ -227,6 +250,15 @@ export function MomentsPage({ session }: { session: Session }) {
                     show(failure ?? 'Moment deleted'),
                   );
                 }}
+                selectable
+                selected={selectedMoments.includes(moment.id)}
+                onSelect={() =>
+                  setSelectedMoments((current) =>
+                    current.includes(moment.id)
+                      ? current.filter((id) => id !== moment.id)
+                      : [...current, moment.id],
+                  )
+                }
               />
             ))}
           </div>

@@ -27,6 +27,10 @@ class AppError extends Error {
   }
 }
 
+type TabCaptureResponse =
+  | { ok: true; saved: SavedMoment }
+  | { ok: false; error?: string };
+
 // Prints every time the worker spins up. Seeing this but never seeing a command
 // means the worker is healthy and the keystroke is the missing piece.
 console.log('[moments] service worker booted');
@@ -73,6 +77,10 @@ async function sendToTab(tabId: number, message: TabMessage): Promise<void> {
   } catch (error) {
     console.warn('[moments] tab message failed', error);
   }
+}
+
+async function requestFromTab<T>(tabId: number, message: TabMessage): Promise<T> {
+  return (await chrome.tabs.sendMessage(tabId, message)) as T;
 }
 
 // Make the hotkey work immediately in already-open YouTube tabs.
@@ -138,8 +146,13 @@ async function handle(request: Request): Promise<Record<string, unknown>> {
       const injected = await ensureContentScript(tab.id);
       if (!injected) throw new AppError('Reload this YouTube tab and try again.');
 
-      await sendToTab(tab.id, { type: 'CAPTURE' });
-      return {};
+      const result = await requestFromTab<TabCaptureResponse>(tab.id, { type: 'CAPTURE' });
+
+      if (!result.ok) {
+        throw new AppError(result.error ?? 'Could not save the moment.');
+      }
+
+      return { saved: result.saved };
     }
 
     case 'SAVE_MOMENT':
@@ -151,20 +164,20 @@ async function handle(request: Request): Promise<Record<string, unknown>> {
     case 'DELETE_MOMENT':
       return await deleteMoment(request.momentId);
 
-      case 'ANNOTATE_LAST': {
-        const tab = await activeYouTubeTab();
-        if (!tab?.id) throw new AppError('Open a YouTube video first.');
+    case 'ANNOTATE_LAST': {
+      const tab = await activeYouTubeTab();
+      if (!tab?.id) throw new AppError('Open a YouTube video first.');
 
-        const saved = await readLastSaved();
-        if (!saved) throw new AppError('Nothing saved yet.');
+      const saved = await readLastSaved();
+      if (!saved) throw new AppError('Nothing saved yet.');
 
-        await sendToTab(tab.id, {
-          type: 'ANNOTATE',
-          saved,
-        });
+      await sendToTab(tab.id, {
+        type: 'ANNOTATE',
+        saved,
+      });
 
-        return {};
-      }
+      return {};
+    }
   }
 }
 

@@ -18,6 +18,9 @@ type Props = {
   onDelete: () => void;
   onTagClick: (name: string) => void;
   onCopy: (text: string, label: string) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelect?: () => void;
 };
 
 export function MomentCard({
@@ -28,6 +31,9 @@ export function MomentCard({
   onDelete,
   onTagClick,
   onCopy,
+  selectable = false,
+  selected = false,
+  onSelect,
 }: Props) {
   const [editingNote, setEditingNote] = useState(false);
   const [draft, setDraft] = useState(moment.note ?? '');
@@ -81,6 +87,16 @@ export function MomentCard({
 
   return (
     <article className="card">
+      {selectable ? (
+        <label className="moment-select">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onSelect}
+            aria-label={`Select ${moment.video.title}`}
+          />
+        </label>
+      ) : null}
       <a className="thumb" href={watchUrl} target="_blank" rel="noreferrer" tabIndex={-1} aria-hidden>
         <img
           src={moment.video.thumbnailUrl ?? thumbnailUrl(moment.video.youtubeVideoId)}

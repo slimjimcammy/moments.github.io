@@ -6,6 +6,7 @@ import {
   type TabMessage,
   type TagsResult,
   type UpdateResult,
+  type SavedMoment,
 } from '../messages';
 import { getPlayerVideo, scrapeVideoMeta } from './scrape';
 import { toast, type MomentHandlers, type UpdatePatch } from './toast';
@@ -64,11 +65,17 @@ function init(): void {
         respond({ ok: true });
         return false;
 
-      case 'CAPTURE':
-        console.log('[moments] capture requested');
-        respond({ ok: true });
-        void capture();
-        return false;
+        case 'CAPTURE':
+          console.log('[moments] capture requested');
+          void capture()
+            .then((saved) => respond(saved ? { ok: true, saved } : { ok: false }))
+            .catch((error) =>
+              respond({
+                ok: false,
+                error: error instanceof Error ? error.message : String(error),
+              }),
+            );
+          return true;
 
       case 'ANNOTATE':
         respond({ ok: true });
@@ -81,13 +88,13 @@ function init(): void {
 /** In flight guard: holding the hotkey down fires the command repeatedly. */
 let capturing = false;
 
-async function capture(): Promise<void> {
-  if (capturing) return;
+async function capture(): Promise<SavedMoment | null> {
+  if (capturing) return null;
 
   const meta = scrapeVideoMeta();
   if (!meta) {
     toast.showError('No YouTube video on this page.');
-    return;
+    return null;
   }
 
   capturing = true;
@@ -96,11 +103,12 @@ async function capture(): Promise<void> {
     const result = await sendToBackground<SaveResult>({ type: 'SAVE_MOMENT', meta });
     if (!result.ok) {
       toast.showError(result.error, { canSignIn: result.code === 'AUTH_REQUIRED' });
-      return;
+      return null;
     }
     toast.showSaved(result.saved, handlersFor(result.saved.momentId), {
       deduped: result.deduped,
     });
+    return result.saved;
   } finally {
     capturing = false;
   }

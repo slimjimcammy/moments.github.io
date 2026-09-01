@@ -1,6 +1,13 @@
 import './popup.css';
-import { sendToBackground, type EmptyResult, type ExtensionState, type StateResult } from '../messages';
-
+import { exportSavedMomentToObsidian } from '../obsidian';
+import {
+  sendToBackground,
+  type EmptyResult,
+  type ExtensionState,
+  type StateResult,
+  type SaveResult,
+  type SavedMoment,
+} from '../messages';
 const el = {
   panel: must<HTMLElement>('.panel'),
   banner: must<HTMLParagraphElement>('#banner'),
@@ -15,9 +22,11 @@ const el = {
   shortcuts: must<HTMLButtonElement>('#shortcuts'),
   lede: must<HTMLParagraphElement>('#lede'),
   keys: must<HTMLElement>('#keys'),
+  export: must<HTMLButtonElement>('#export'),
 };
 
 let state: ExtensionState | null = null;
+let lastCaptured: SavedMoment | null = null;
 
 el.signin.addEventListener('click', async () => {
   el.signin.disabled = true;
@@ -43,14 +52,44 @@ el.signout.addEventListener('click', async () => {
 el.capture.addEventListener('click', async () => {
   el.capture.disabled = true;
   el.capture.textContent = 'Saving…';
-  const result = await sendToBackground<EmptyResult>({ type: 'CAPTURE_ACTIVE_TAB' });
-  if (result.ok) {
-    window.close();
-    return;
-  }
+  el.export.hidden = true;
+
+  const result = await sendToBackground<SaveResult>({
+    type: 'CAPTURE_ACTIVE_TAB',
+  });
+
   el.capture.disabled = false;
   el.capture.textContent = 'Save this moment';
-  showBanner(result.error);
+
+  if (!result.ok) {
+    showBanner(result.error);
+    return;
+  }
+
+  lastCaptured = result.saved;
+  el.export.hidden = false;
+  el.export.textContent = 'Export this moment to Obsidian';
+});
+
+el.export.addEventListener('click', async () => {
+  if (!lastCaptured) return;
+
+  el.export.disabled = true;
+  el.export.textContent = 'Exporting…';
+
+  try {
+    await exportSavedMomentToObsidian(lastCaptured);
+    el.export.textContent = 'Exported to Obsidian ✓';
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      el.export.textContent = 'Export this moment to Obsidian';
+    } else {
+      showBanner(error instanceof Error ? error.message : 'Obsidian export failed.');
+      el.export.textContent = 'Export this moment to Obsidian';
+    }
+  } finally {
+    el.export.disabled = false;
+  }
 });
 
 el.open.addEventListener('click', () => {
@@ -101,7 +140,7 @@ function render(next: ExtensionState): void {
     el.avatar.removeAttribute('src');
     el.lede.textContent = next.configError
       ? 'Add your Supabase keys, rebuild, then reload the extension.'
-      : 'Sign in once, then Ctrl+Shift+1 saves whatever you are watching.';
+      : 'Sign in once, then Alt+Shift+M saves whatever you are watching.';
   }
 }
 

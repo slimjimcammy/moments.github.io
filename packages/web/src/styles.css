@@ -279,6 +279,7 @@ kbd {
   gap: 16px;
   padding: 20px 0;
   border-top: 1px solid var(--line-soft);
+  position: relative;
 }
 
 .list .card:first-child {
@@ -655,6 +656,19 @@ kbd {
   color: #fda4af;
 }
 
+.moment-select {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+}
+
+.moment-select input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
 /* ------------------------------------------------------------ responsive */
 
 @media (max-width: 620px) {
@@ -665,6 +679,7 @@ kbd {
   .card {
     grid-template-columns: 1fr;
     gap: 12px;
+    position: relative;
   }
 
   .thumb {
